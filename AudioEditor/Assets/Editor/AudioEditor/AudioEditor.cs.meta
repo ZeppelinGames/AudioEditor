@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 28bb738acb86b8f49bf47cafd28c2a97
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_ViewDataDictionary: {instanceID: 0}
+  - rewindTexture: {fileID: 2800000, guid: 5663de5a94f97464a9e6132fff2fc119, type: 3}
+  - playTexture: {fileID: 2800000, guid: 69e517a01b220cb4e88b96b8d57f4e71, type: 3}
+  - pauseTexture: {fileID: 2800000, guid: 9b881c34b79e6f64da083604f2619ad8, type: 3}
+  - fastForwardTexture: {fileID: 2800000, guid: 27e5e37e04051364c93d76b9dbfdded0,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
