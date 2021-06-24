@@ -224,6 +224,10 @@ public class AudioEditor : EditorWindow
         if (audioDataSO != tmpAudioData)
         {
             audioDataSO = tmpAudioData;
+            if (audioDataSO != null)
+            {
+                EditorUtility.SetDirty(audioDataSO);
+            }
             ReloadAudioData();
         }
         if (tmpAudioData != null)
@@ -235,17 +239,20 @@ public class AudioEditor : EditorWindow
         }
         else
         {
-            AudioClipChanged(null);
+            if (audioClip != null)
+            {
+                AudioClipChanged(null);
+            }
         }
         GUI.EndGroup();
 
         GUI.BeginGroup(layerGroup);
         OutlinedRect(layerGroup, 2, defaultCol, defaultOutlineCol);
         //new Rect(0,0,layerGroup.width,layerGroup.height)
-        layerScrollPos = GUI.BeginScrollView(new Rect(0,0,layerGroup.width-1,layerGroup.height-1), layerScrollPos, new Rect(0, 0, layerGroup.width-25, (audioLayers.Count * 25) +1),false,true);
-        for(int n = 0; n < audioLayers.Count; n++)
+        layerScrollPos = GUI.BeginScrollView(new Rect(0, 0, layerGroup.width - 1, layerGroup.height - 1), layerScrollPos, new Rect(0, 0, layerGroup.width - 25, (audioLayers.Count * 25) + 1), false, true);
+        for (int n = 0; n < audioLayers.Count; n++)
         {
-            DrawLayer(new Rect(0, n * 25, layerGroup.width-10, 25), audioLayers[n]);
+            DrawLayer(new Rect(0, n * 25, layerGroup.width - 10, 25), audioLayers[n]);
         }
         GUI.EndScrollView();
         GUI.EndGroup();
@@ -253,7 +260,7 @@ public class AudioEditor : EditorWindow
         GUI.BeginGroup(layerOptionsGroup);
         OutlinedRect(layerOptionsGroup, 1, defaultCol, defaultOutlineCol);
         GUILayout.BeginHorizontal();
-        bool addLayer = GUI.Button(new Rect(0,0,layerOptionsGroup.height,layerOptionsGroup.height), "+");
+        bool addLayer = GUI.Button(new Rect(0, 0, layerOptionsGroup.height, layerOptionsGroup.height), "+");
         bool removeLayer = GUI.Button(new Rect(layerOptionsGroup.height, 0, layerOptionsGroup.height, layerOptionsGroup.height), "-");
         GUILayout.EndHorizontal();
         GUI.EndGroup();
@@ -283,7 +290,7 @@ public class AudioEditor : EditorWindow
             }
         }
 
-        if(addLayer)
+        if (addLayer)
         {
             audioLayers.Add(NewLayer());
         }
@@ -358,7 +365,7 @@ public class AudioEditor : EditorWindow
         if (audioLayer.layerColor != newLayerCol)
         {
             audioLayer.layerColor = newLayerCol;
-            audioDataSO.newLayerColour(audioLayer.layerName, newLayerCol);
+            audioDataSO.newLayerColour(audioLayer.layerName, newLayerCol);     
         }
 
         string newLayerName = EditorGUI.TextField(new Rect(15, layerRect.y + (layerRect.height * 0.125f), layerRect.width-(layerRect.height*1.75f), layerRect.height * 0.75f),new GUIContent("","Layer Name"), audioLayer.layerName);
@@ -376,7 +383,7 @@ public class AudioEditor : EditorWindow
 
             if (!matchesName)
             {
-                audioDataSO.newLayerName(audioLayer.layerName, newLayerName);
+                audioDataSO.newLayerName(audioLayer.layerName, newLayerName); 
                 audioLayer.layerName = newLayerName;
             }
         }
@@ -495,10 +502,13 @@ public class AudioEditor : EditorWindow
 
     void AudioClipChanged(AudioClip changeTo)
     {
-        Debug.Log("[AUDIO EDITOR] Audio clip changed");
-        PauseAudio();
-        audioClip = changeTo;
-        audioUpdated = true;
+        if (audioClip != changeTo)
+        {
+            Debug.Log("[AUDIO EDITOR] Audio clip changed");
+            PauseAudio();
+            audioClip = changeTo;
+            audioUpdated = true;
+        }
     }
 
     void OutlinedRect(Rect rect, float outlineWidth, Color innerColour, Color outlineColor)

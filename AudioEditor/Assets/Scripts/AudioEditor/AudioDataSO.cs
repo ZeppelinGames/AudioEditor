@@ -1,18 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 [CreateAssetMenu(fileName = "New Audio Data", menuName = "Audio/Audio Editor/Audio Data")]
 public class AudioDataSO : ScriptableObject
 {
-    public AudioClip audioFile;
-    public List<AudioData> audioMarkers = new List<AudioData>();
+    [SerializeField] public AudioClip audioFile;
+    [SerializeField] public List<AudioData> audioMarkers = new List<AudioData>();
 
     public void AddLayer(string layer)
     {
         if (!hasLayer(layer))
         {
             audioMarkers.Add(new AudioData(layer, new List<float>(), Color.white));
+            SaveSOData();
         }
     }
 
@@ -24,12 +26,14 @@ public class AudioDataSO : ScriptableObject
             if (layerIndex >= 0)
             {
                 audioMarkers[layerIndex].audioMarkers.Add(audioPosition);
+                SaveSOData();
             }
             else
             {
                 AudioData newLayer = new AudioData(layer, new List<float>(), dataCol);
                 AddLayer(layer);
                 audioMarkers[audioMarkers.IndexOf(newLayer)].audioMarkers.Add(audioPosition);
+                SaveSOData();
             }
         }
     }
@@ -40,6 +44,7 @@ public class AudioDataSO : ScriptableObject
         if (layerIndex >= 0)
         {
             audioMarkers[layerIndex].audioMarkers.Remove(audioPosition);
+            SaveSOData();
         }
     }
 
@@ -49,6 +54,7 @@ public class AudioDataSO : ScriptableObject
         if (layerIndex >= 0)
         {
             audioMarkers.RemoveAt(layerIndex);
+            SaveSOData();
         }
     }
 
@@ -58,6 +64,7 @@ public class AudioDataSO : ScriptableObject
         {
             int index = getLayerIndex(layer);
             audioMarkers[index].audioLayer = newName;
+            SaveSOData();
         }
     }
 
@@ -67,8 +74,20 @@ public class AudioDataSO : ScriptableObject
         {
             int index = getLayerIndex(layer);
             audioMarkers[index].dataColor = newColor;
+            SaveSOData();
         }
     }
+
+    bool save = false;
+    void SaveSOData()
+    {
+        if (save)
+        {
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+    }
+
 
     int getLayerIndex(string layer)
     {
@@ -98,11 +117,11 @@ public class AudioDataSO : ScriptableObject
     [System.Serializable]
     public class AudioData
     {
-        public string audioLayer;
-        public Color dataColor;
-        public List<float> audioMarkers = new List<float>();
+        [SerializeField] public string audioLayer;
+        [SerializeField] public Color dataColor;
+        [SerializeField] public List<float> audioMarkers = new List<float>();
 
-        public AudioData(string audioLayer, List<float> audioMarkers,Color dataColor)
+        public AudioData(string audioLayer, List<float> audioMarkers, Color dataColor)
         {
             this.audioLayer = audioLayer;
             this.audioMarkers = audioMarkers;
