@@ -294,20 +294,36 @@ public class AudioEditor : EditorWindow
         {
             audioLayers.Add(NewLayer());
         }
+
         if (removeLayer)
         {
             if (selectedLayer != null)
             {
-                for (int n = 0; n < audioMarkers.Count; n++)
+                /*  for (int n = 0; n < audioMarkers.Count; n++)
+                  {
+                      if (audioMarkers[n].audioLayer.layerName.ToLower().Equals(selectedLayer.layerName.ToLower()))
+                      {
+                          audioMarkers.Remove(audioMarkers[n]);
+                      }
+                  }*/
+
+                List<AudioMarker> deleteMarkers = new List<AudioMarker>();
+                foreach(AudioMarker marker in audioMarkers)
                 {
-                    if (audioMarkers[n].audioLayer == selectedLayer)
+                    if(marker.audioLayer == selectedLayer)
                     {
-                        audioMarkers.Remove(audioMarkers[n]);
+                        deleteMarkers.Add(marker);
                     }
+                }
+                foreach(AudioMarker deleteMarker in deleteMarkers)
+                {
+                    audioMarkers.Remove(deleteMarker);
                 }
 
                 audioDataSO.DeleteLayer(selectedLayer.layerName);
                 audioLayers.Remove(selectedLayer);
+
+                selectedLayer = null;
             }
         }
     }
