@@ -299,14 +299,6 @@ public class AudioEditor : EditorWindow
         {
             if (selectedLayer != null)
             {
-                /*  for (int n = 0; n < audioMarkers.Count; n++)
-                  {
-                      if (audioMarkers[n].audioLayer.layerName.ToLower().Equals(selectedLayer.layerName.ToLower()))
-                      {
-                          audioMarkers.Remove(audioMarkers[n]);
-                      }
-                  }*/
-
                 List<AudioMarker> deleteMarkers = new List<AudioMarker>();
                 foreach(AudioMarker marker in audioMarkers)
                 {
@@ -463,7 +455,7 @@ public class AudioEditor : EditorWindow
         markerScrollPos = GUI.BeginScrollView(new Rect(0, 0, audioMarkersGroup.width - 1, audioMarkersGroup.height - 1), markerScrollPos, new Rect(0, 0, audioMarkersGroup.width - 25, (audioMarkers.Count * 25) + 1), false, true);
         for(int n =0; n < audioMarkers.Count;n++)
         {
-            DrawAudioMarker(new Rect(audioMarkers[n].markerTime * (rightGroup.width / audioClip.length) - 1.5f, 0, 3, 10), audioMarkers[n]);
+            DrawAudioMarker(new Rect(audioMarkers[n].markerTime * (rightGroup.width / audioClip.length) - 1.5f, audioLayers.IndexOf(audioMarkers[n].audioLayer) * 10, 3, 10), audioMarkers[n]);
         }
         GUI.EndScrollView();
         GUI.EndGroup();

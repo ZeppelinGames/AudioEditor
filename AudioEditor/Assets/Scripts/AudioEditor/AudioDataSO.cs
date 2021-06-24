@@ -14,7 +14,6 @@ public class AudioDataSO : ScriptableObject
         if (!hasLayer(layer))
         {
             audioMarkers.Add(new AudioData(layer, new List<float>(), Color.white));
-            SaveSOData();
         }
     }
 
@@ -25,15 +24,13 @@ public class AudioDataSO : ScriptableObject
             int layerIndex = getLayerIndex(layer);
             if (layerIndex >= 0)
             {
-                audioMarkers[layerIndex].audioMarkers.Add(audioPosition);
-                SaveSOData();
+                audioMarkers[layerIndex].audioMarkers.Add(audioPosition); 
             }
             else
             {
                 AudioData newLayer = new AudioData(layer, new List<float>(), dataCol);
                 AddLayer(layer);
                 audioMarkers[audioMarkers.IndexOf(newLayer)].audioMarkers.Add(audioPosition);
-                SaveSOData();
             }
         }
     }
@@ -44,7 +41,6 @@ public class AudioDataSO : ScriptableObject
         if (layerIndex >= 0)
         {
             audioMarkers[layerIndex].audioMarkers.Remove(audioPosition);
-            SaveSOData();
         }
     }
 
@@ -53,8 +49,7 @@ public class AudioDataSO : ScriptableObject
         int layerIndex = getLayerIndex(layer);
         if (layerIndex >= 0)
         {
-            audioMarkers.RemoveAt(layerIndex);
-            SaveSOData();
+            audioMarkers.RemoveAt(layerIndex); 
         }
     }
 
@@ -63,8 +58,7 @@ public class AudioDataSO : ScriptableObject
         if (hasLayer(layer))
         {
             int index = getLayerIndex(layer);
-            audioMarkers[index].audioLayer = newName;
-            SaveSOData();
+            audioMarkers[index].audioLayer = newName;     
         }
     }
 
@@ -74,20 +68,8 @@ public class AudioDataSO : ScriptableObject
         {
             int index = getLayerIndex(layer);
             audioMarkers[index].dataColor = newColor;
-            SaveSOData();
         }
     }
-
-    bool save = false;
-    void SaveSOData()
-    {
-        if (save)
-        {
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
-    }
-
 
     int getLayerIndex(string layer)
     {
