@@ -452,7 +452,7 @@ public class AudioEditor : EditorWindow
         GUI.EndGroup();
 
         GUI.BeginGroup(audioMarkersGroup);
-        markerScrollPos = GUI.BeginScrollView(new Rect(0, 0, audioMarkersGroup.width - 1, audioMarkersGroup.height - 1), markerScrollPos, new Rect(0, 0, audioMarkersGroup.width - 25, (audioMarkers.Count * 25) + 1), false, true);
+        markerScrollPos = GUI.BeginScrollView(new Rect(0, 0, audioMarkersGroup.width - 1, audioMarkersGroup.height - 1), markerScrollPos, new Rect(0, 0, audioMarkersGroup.width - 25, (audioLayers.Count * 10) + 1), false, true);
         for(int n =0; n < audioMarkers.Count;n++)
         {
             DrawAudioMarker(new Rect(audioMarkers[n].markerTime * (rightGroup.width / audioClip.length) - 1.5f, audioLayers.IndexOf(audioMarkers[n].audioLayer) * 10, 3, 10), audioMarkers[n]);
