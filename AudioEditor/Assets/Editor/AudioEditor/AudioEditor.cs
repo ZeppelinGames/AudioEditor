@@ -5,11 +5,6 @@ using System.Collections.Generic;
 public class AudioEditor : EditorWindow
 {
     #region Variables
-    private Texture2D rewindTexture;
-    private Texture2D playTexture;
-    private Texture2D pauseTexture;
-    private Texture2D fastForwardTexture;
-
     AudioDataSO audioDataSO;
     AudioClip audioClip;
     Texture2D audioWaveformTexture;
@@ -42,23 +37,24 @@ public class AudioEditor : EditorWindow
 
     private List<AudioLayer> audioLayers = new List<AudioLayer>();
     private List<AudioMarker> audioMarkers = new List<AudioMarker>();
+
+    GUISkin markerBTNSkin;
+    Vector2 markerSize = new Vector2(5, 15);
     #endregion
 
     [MenuItem("Window/Audio/Audio Editor")]
     public static void ShowWindow()
     {
-        GetWindow<AudioEditor>("Audio Editor");
+        GetWindow<AudioEditor>("Audio Editor",true);
     }
 
     private void OnEnable()
     {
         leftGroup = new Rect(0, 0, position.width * 0.25f, position.height);
 
-        Debug.Log("[AUDIO EDITOR] LOADED TEXTURES");
-        rewindTexture = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/AudioEditor/Textures/rewindTexture.png", typeof(Texture2D));
-        playTexture = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/AudioEditor/Textures/playTexture.png", typeof(Texture2D));
-        pauseTexture = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/AudioEditor/Textures/pauseTexture.png", typeof(Texture2D));
-        fastForwardTexture = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/AudioEditor/Textures/fastforwardTexture.png", typeof(Texture2D));
+        markerBTNSkin = CreateInstance<GUISkin>();
+        markerBTNSkin.button.normal.background = new Texture2D((int)markerSize.x, (int)markerSize.y);
+        markerBTNSkin.button.border = new RectOffset(0, 0, 0, 0);
 
         ReloadAudioData();
     }
@@ -94,9 +90,9 @@ public class AudioEditor : EditorWindow
 
     AudioLayer getLayerByName(string layerName)
     {
-        foreach(AudioLayer layer in audioLayers)
+        foreach (AudioLayer layer in audioLayers)
         {
-            if(layer.layerName.ToLower().Equals(layerName.ToLower()))
+            if (layer.layerName.ToLower().Equals(layerName.ToLower()))
             {
                 return layer;
             }
@@ -119,7 +115,7 @@ public class AudioEditor : EditorWindow
             leftGroup = new Rect(0, 0, position.width * 0.25f, position.height);
             topLeftGroup = new Rect(leftGroup.position, new Vector2(leftGroup.width, 25));
             audioClipGroup = new Rect(leftGroup.position + new Vector2((leftGroup.width * 0.05f), 5), new Vector2(leftGroup.width * 0.9f, 50));
-            layerGroup = new Rect(leftGroup.position + new Vector2((leftGroup.width * 0.05f), audioClipGroup.height), new Vector2(leftGroup.width * 0.9f, leftGroup.height-85));
+            layerGroup = new Rect(leftGroup.position + new Vector2((leftGroup.width * 0.05f), audioClipGroup.height), new Vector2(leftGroup.width * 0.9f, leftGroup.height - 85));
             layerOptionsGroup = new Rect(new Vector2(leftGroup.position.x + (leftGroup.width * 0.05f), leftGroup.height - 30), new Vector2(leftGroup.width * 0.9f, 25));
 
             rightGroup = new Rect(position.width * 0.25f, 0, position.width * 0.75f, position.height);
@@ -196,7 +192,7 @@ public class AudioEditor : EditorWindow
         {
             PauseAudio();
             float scale = (position.width / rightGroup.width);
-            audioPosition = ((Mathf.Clamp((e.mousePosition.x - rightGroup.position.x),0,position.width) * scale)) / (((rightGroup.width + rightGroup.position.x)));
+            audioPosition = ((Mathf.Clamp((e.mousePosition.x - rightGroup.position.x), 0, position.width) * scale)) / (((rightGroup.width + rightGroup.position.x)));
             audioPosition = Mathf.Clamp01(audioPosition);
             e.Use();
         }
@@ -211,10 +207,10 @@ public class AudioEditor : EditorWindow
 
         GUI.BeginGroup(topLeftGroup);
         GUILayout.BeginHorizontal();
-        bool rewind = GUILayout.Button(new GUIContent("|<", rewindTexture), GUILayout.Width(topLeftGroup.height));
-        bool play = GUILayout.Button(new GUIContent(">", playTexture), GUILayout.Width(topLeftGroup.height));
-        bool pause = GUILayout.Button(new GUIContent("||", pauseTexture), GUILayout.Width(topLeftGroup.height));
-        bool fastforward = GUILayout.Button(new GUIContent(">|", fastForwardTexture), GUILayout.Width(topLeftGroup.height));
+        bool rewind = GUILayout.Button(new GUIContent("|<"), GUILayout.Width(topLeftGroup.height));
+        bool play = GUILayout.Button(new GUIContent(">"), GUILayout.Width(topLeftGroup.height));
+        bool pause = GUILayout.Button(new GUIContent("||"), GUILayout.Width(topLeftGroup.height));
+        bool fastforward = GUILayout.Button(new GUIContent(">|"), GUILayout.Width(topLeftGroup.height));
         bool addMarker = GUILayout.Button("\\/", GUILayout.Width(topLeftGroup.height));
         GUILayout.EndHorizontal();
         GUI.EndGroup();
@@ -300,14 +296,14 @@ public class AudioEditor : EditorWindow
             if (selectedLayer != null)
             {
                 List<AudioMarker> deleteMarkers = new List<AudioMarker>();
-                foreach(AudioMarker marker in audioMarkers)
+                foreach (AudioMarker marker in audioMarkers)
                 {
-                    if(marker.audioLayer == selectedLayer)
+                    if (marker.audioLayer == selectedLayer)
                     {
                         deleteMarkers.Add(marker);
                     }
                 }
-                foreach(AudioMarker deleteMarker in deleteMarkers)
+                foreach (AudioMarker deleteMarker in deleteMarkers)
                 {
                     audioMarkers.Remove(deleteMarker);
                 }
@@ -368,15 +364,15 @@ public class AudioEditor : EditorWindow
 
         bool selectionButton = GUI.Button(new Rect(layerRect.x + (layerRect.width - layerRect.height), layerRect.y + (layerRect.height * 0.05f), layerRect.height, layerRect.height * 0.9f), "");
 
-        EditorGUI.DrawRect(new Rect(4, layerRect.height * 0.1f + layerRect.y -1, 7, layerRect.height * 0.8f + 2), Color.black);
+        EditorGUI.DrawRect(new Rect(4, layerRect.height * 0.1f + layerRect.y - 1, 7, layerRect.height * 0.8f + 2), Color.black);
         Color newLayerCol = EditorGUI.ColorField(new Rect(5, layerRect.height * 0.1f + layerRect.y, 5, layerRect.height * 0.8f), new GUIContent("", "Layer Colour"), audioLayer.layerColor, false, false, false);
         if (audioLayer.layerColor != newLayerCol)
         {
             audioLayer.layerColor = newLayerCol;
-            audioDataSO.newLayerColour(audioLayer.layerName, newLayerCol);     
+            audioDataSO.newLayerColour(audioLayer.layerName, newLayerCol);
         }
 
-        string newLayerName = EditorGUI.TextField(new Rect(15, layerRect.y + (layerRect.height * 0.125f), layerRect.width-(layerRect.height*1.75f), layerRect.height * 0.75f),new GUIContent("","Layer Name"), audioLayer.layerName);
+        string newLayerName = EditorGUI.TextField(new Rect(15, layerRect.y + (layerRect.height * 0.125f), layerRect.width - (layerRect.height * 1.75f), layerRect.height * 0.75f), new GUIContent("", "Layer Name"), audioLayer.layerName);
 
         if (!string.IsNullOrWhiteSpace(newLayerName))
         {
@@ -391,7 +387,7 @@ public class AudioEditor : EditorWindow
 
             if (!matchesName)
             {
-                audioDataSO.newLayerName(audioLayer.layerName, newLayerName); 
+                audioDataSO.newLayerName(audioLayer.layerName, newLayerName);
                 audioLayer.layerName = newLayerName;
             }
         }
@@ -448,14 +444,14 @@ public class AudioEditor : EditorWindow
         GUI.EndGroup();
 
         GUI.BeginGroup(audioSliderGroup);
-        EditorGUI.MinMaxSlider(new Rect(5,0,audioSliderGroup.width-10,audioSliderGroup.height), ref minSliderSize, ref maxSliderSize, 0, audioWaveFormGroup.width);
+        EditorGUI.MinMaxSlider(new Rect(5, 0, audioSliderGroup.width - 10, audioSliderGroup.height), ref minSliderSize, ref maxSliderSize, 0, audioWaveFormGroup.width);
         GUI.EndGroup();
 
         GUI.BeginGroup(audioMarkersGroup);
-        markerScrollPos = GUI.BeginScrollView(new Rect(0, 0, audioMarkersGroup.width - 1, audioMarkersGroup.height - 1), markerScrollPos, new Rect(0, 0, audioMarkersGroup.width - 25, (audioLayers.Count * 10) + 1), false, true);
-        for(int n =0; n < audioMarkers.Count;n++)
+        markerScrollPos = GUI.BeginScrollView(new Rect(0, 0, audioMarkersGroup.width - 1, audioMarkersGroup.height - 1), markerScrollPos, new Rect(0, 0, audioMarkersGroup.width - 25, (audioLayers.Count * (markerSize.y)) + 1), false, true);
+        for (int n = 0; n < audioMarkers.Count; n++)
         {
-            DrawAudioMarker(new Rect(audioMarkers[n].markerTime * (rightGroup.width / audioClip.length) - 1.5f, audioLayers.IndexOf(audioMarkers[n].audioLayer) * 10, 3, 10), audioMarkers[n]);
+            DrawAudioMarker(new Rect(audioMarkers[n].markerTime * (rightGroup.width / audioClip.length) - 1.5f, audioLayers.IndexOf(audioMarkers[n].audioLayer) * markerSize.y, markerSize.x, markerSize.y), audioMarkers[n]);
         }
         GUI.EndScrollView();
         GUI.EndGroup();
@@ -463,11 +459,42 @@ public class AudioEditor : EditorWindow
         GUI.EndGroup();
     }
 
+    AudioMarker selectedMarker = null;
+    bool colouredButton(Rect rect, Color col, bool selected = false)
+    {
+        if (selected)
+        {
+            EditorGUI.DrawRect(new Rect(rect.x - (rect.width * 0.05f), rect.y - (rect.height * 0.05f), rect.width * 1.2f, rect.height * 1.2f), Color.white);
+        }
+       // GUISkin oldSkin = GUI.skin;
+
+       // GUI.skin = markerBTNSkin;
+
+        var oldColor = GUI.backgroundColor;
+        GUI.backgroundColor = col;
+        GUI.contentColor = col;
+        GUI.color = col;
+
+        bool button = GUI.Button(new Rect(rect.x, rect.y, markerSize.x, markerSize.y), new GUIContent(new Texture2D((int)rect.width*2, (int)rect.height*2)));
+
+        //GUI.skin = oldSkin;
+        GUI.backgroundColor = oldColor;
+        GUI.contentColor = oldColor;
+        GUI.color = oldColor;
+
+        return button;
+    }
+
     void DrawAudioMarker(Rect markerPos, AudioMarker marker)
     {
         if (marker != null && marker.audioLayer != null)
         {
-            EditorGUI.DrawRect(markerPos, marker.audioLayer.layerColor);
+            bool markerClick = colouredButton(markerPos, marker.audioLayer.layerColor, selectedMarker == marker);
+            if (markerClick)
+            {
+                selectedMarker = marker;
+                selectedLayer = marker.audioLayer;
+            }
         }
     }
 

@@ -13,4 +13,18 @@ MonoBehaviour:
   m_Name: LeftWithLess
   m_EditorClassIdentifier: 
   audioFile: {fileID: 8300000, guid: 3c4582794023d694caa4cb5ad68828f9, type: 3}
-  audioMarkers: []
+  audioMarkers:
+  - audioLayer: New Layer
+    dataColor: {r: 0.050980568, g: 1, b: 0, a: 1}
+    audioMarkers:
+    - 0
+    - 5.726668
+    - 2.3172004
+    - 0
+    - 12.554385
+    - 9.132945
+    - 8.167954
+  - audioLayer: New Layer_1
+    dataColor: {r: 1, g: 1, b: 1, a: 1}
+    audioMarkers:
+    - 4.2750144
