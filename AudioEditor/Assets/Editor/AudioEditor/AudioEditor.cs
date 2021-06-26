@@ -206,8 +206,8 @@ public class AudioEditor : EditorWindow
         {
             PauseAudio();
             float scale = (position.width / rightGroup.width);
-            audioPosition = ((Mathf.Clamp((e.mousePosition.x - rightGroup.position.x), 0, position.width) * scale)) / (((rightGroup.width + rightGroup.position.x)));
-            audioPosition = Mathf.Clamp01(audioPosition);
+            audioPosition = Mathf.Clamp(e.mousePosition.x - rightGroup.position.x, 0, position.width) * scale / (rightGroup.width + rightGroup.position.x);
+            //audioPosition = Mathf.Clamp01(audioPosition);
             e.Use();
         }
     }
@@ -226,6 +226,11 @@ public class AudioEditor : EditorWindow
         bool pause = GUILayout.Button(new GUIContent("||"), GUILayout.Width(topLeftGroup.height));
         bool fastforward = GUILayout.Button(new GUIContent(">|"), GUILayout.Width(topLeftGroup.height));
         bool addMarker = GUILayout.Button("\\/", GUILayout.Width(topLeftGroup.height));
+
+        if (audioClip != null)
+        {
+            GUI.Label(new Rect(topLeftGroup.width - 50, topLeftGroup.y, 50, topLeftGroup.height), new GUIContent((audioPosition * audioClip.length).ToString("F2")));
+        }
         GUILayout.EndHorizontal();
         GUI.EndGroup();
 
@@ -425,25 +430,24 @@ public class AudioEditor : EditorWindow
         OutlinedRect(rightGroup, 1, defaultCol, defaultOutlineCol);
         OutlinedRect(topRightGroup, 2, defaultCol, defaultOutlineCol);
 
-        float timeStart = (minSliderSize / rightGroup.width) * audioClip.length;
-        float timeEnd = (maxSliderSize / rightGroup.width) * audioClip.length;
-
-        /*   int scale = audioClip != null ? (int)audioClip.length : 30;
-           for (int x = 0; x < 60 * scale ; x += 60)
-           {
-               float height = 5;
-               if (x % 300 == 0)
-               {
-                   height = 10;
-                   GUI.Label(new Rect(x * (rightGroup.width / (60 * scale)), 5, rightGroup.width / 10, 15), ((float)(x) / 60).ToString("F2"));
-               }
-               EditorGUI.DrawRect(new Rect(x * (rightGroup.width / (60 * scale)), 0, 1, height), Color.white);
-           }*/
-        float zoom = rightGroup.width / (maxSliderSize - minSliderSize);
-        for (float x = 0; x < rightGroup.width; x += zoom)
+        if (audioClip != null)
         {
-            float height = 5;
-            EditorGUI.DrawRect(new Rect(x * (rightGroup.width / (60)), 0, 1, height), Color.white);
+            float timeStart = (minSliderSize / rightGroup.width) * audioClip.length;
+            float timeEnd = (maxSliderSize / rightGroup.width) * audioClip.length;
+
+            float zoom = rightGroup.width / (maxSliderSize - minSliderSize);
+            for (int x = 0; x < rightGroup.width; x++)
+            {
+                float scaledX = x * zoom;
+                float height = 5;
+                float currTime = ((timeEnd - timeStart) / timeEnd) * x;
+                if (x % 10 == 0)
+                {
+                    height = 10;
+                    GUI.Label(new Rect(scaledX * (rightGroup.width / (60)), 5, rightGroup.width / 10, 15), ((float)((timeStart * audioClip.length) + (currTime * audioClip.length)) / 60).ToString("F2"));
+                }
+                EditorGUI.DrawRect(new Rect(scaledX * (rightGroup.width / (60)), 0, 1, height), Color.white);
+            }
         }
 
         GUI.BeginGroup(audioWaveFormGroup);
@@ -571,6 +575,8 @@ public class AudioEditor : EditorWindow
     public Texture2D PaintWaveformSpectrum(AudioClip audio, int width, int height, Color col)
     {
         Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Point;
+
         float[] samples = new float[audio.samples * audio.channels];
         float[] waveform = new float[width];
 
