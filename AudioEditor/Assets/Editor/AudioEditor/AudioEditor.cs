@@ -53,7 +53,9 @@ public class AudioEditor : EditorWindow
         leftGroup = new Rect(0, 0, position.width * 0.25f, position.height);
 
         markerBTNSkin = CreateInstance<GUISkin>();
-        markerBTNSkin.button.normal.background = new Texture2D((int)markerSize.x, (int)markerSize.y);
+        Texture2D markerTexture = new Texture2D((int)markerSize.x, (int)markerSize.y);
+        markerBTNSkin.button.onNormal.background = markerTexture;
+        markerBTNSkin.button.normal.background = markerTexture;
         markerBTNSkin.button.border = new RectOffset(0, 0, 0, 0);
 
         ReloadAudioData();
@@ -157,6 +159,18 @@ public class AudioEditor : EditorWindow
                         {
                             UpdateAudioPosition(currentEvent);
                         }
+                    }
+                }
+            }
+
+            if (currentEvent.isKey)
+            {
+                if (currentEvent.keyCode == KeyCode.Delete)
+                {
+                    if (selectedMarker != null)
+                    {
+                        audioDataSO.RemoveMarker(selectedMarker.audioLayer.layerName, selectedMarker.markerTime);
+                        audioMarkers.Remove(selectedMarker);
                     }
                 }
             }
@@ -353,7 +367,7 @@ public class AudioEditor : EditorWindow
     AudioLayer selectedLayer;
     void DrawLayer(Rect layerRect, AudioLayer audioLayer)
     {
-        if (audioLayer.selected)
+        if (audioLayer == selectedLayer)
         {
             EditorGUI.DrawRect(layerRect, Color.white);
         }
@@ -395,13 +409,10 @@ public class AudioEditor : EditorWindow
         {
             if (selectedLayer == null)
             {
-                audioLayer.selected = true;
                 selectedLayer = audioLayer;
             }
             else
             {
-                selectedLayer.selected = false;
-                audioLayer.selected = true;
                 selectedLayer = audioLayer;
             }
         }
@@ -414,18 +425,26 @@ public class AudioEditor : EditorWindow
         OutlinedRect(rightGroup, 1, defaultCol, defaultOutlineCol);
         OutlinedRect(topRightGroup, 2, defaultCol, defaultOutlineCol);
 
-        int scale = audioClip != null ? (int)audioClip.length : 30;
-        for (int x = 0; x < 60 * scale; x += 60)
+        float timeStart = (minSliderSize / rightGroup.width) * audioClip.length;
+        float timeEnd = (maxSliderSize / rightGroup.width) * audioClip.length;
+
+        /*   int scale = audioClip != null ? (int)audioClip.length : 30;
+           for (int x = 0; x < 60 * scale ; x += 60)
+           {
+               float height = 5;
+               if (x % 300 == 0)
+               {
+                   height = 10;
+                   GUI.Label(new Rect(x * (rightGroup.width / (60 * scale)), 5, rightGroup.width / 10, 15), ((float)(x) / 60).ToString("F2"));
+               }
+               EditorGUI.DrawRect(new Rect(x * (rightGroup.width / (60 * scale)), 0, 1, height), Color.white);
+           }*/
+        float zoom = rightGroup.width / (maxSliderSize - minSliderSize);
+        for (float x = 0; x < rightGroup.width; x += zoom)
         {
             float height = 5;
-            if (x % 300 == 0)
-            {
-                height = 10;
-                GUI.Label(new Rect(x * (rightGroup.width / (60 * scale)), 5, rightGroup.width / 10, 15), ((float)x / 60).ToString("F2"));
-            }
-            EditorGUI.DrawRect(new Rect(x * (rightGroup.width / (60 * scale)), 0, 1, height), Color.white);
+            EditorGUI.DrawRect(new Rect(x * (rightGroup.width / (60)), 0, 1, height), Color.white);
         }
-
 
         GUI.BeginGroup(audioWaveFormGroup);
         OutlinedRect(audioWaveFormGroup, 1, defaultCol, defaultOutlineCol);
@@ -438,13 +457,14 @@ public class AudioEditor : EditorWindow
             }
             if (audioWaveformTexture != null)
             {
-                GUI.DrawTextureWithTexCoords(new Rect(0, 0, audioWaveFormGroup.width, audioWaveFormGroup.height), audioWaveformTexture, new Rect(0, 0, 1, 1));
+                GUI.DrawTextureWithTexCoords(new Rect(0, 0, audioWaveFormGroup.width, audioWaveFormGroup.height), audioWaveformTexture, new Rect(minSliderSize/rightGroup.width, 0, (maxSliderSize-minSliderSize)/rightGroup.width, 1));
             }
         }
         GUI.EndGroup();
 
         GUI.BeginGroup(audioSliderGroup);
         EditorGUI.MinMaxSlider(new Rect(5, 0, audioSliderGroup.width - 10, audioSliderGroup.height), ref minSliderSize, ref maxSliderSize, 0, audioWaveFormGroup.width);
+        //Debug.Log("MIN: " + minSliderSize + " MAX:" + maxSliderSize);
         GUI.EndGroup();
 
         GUI.BeginGroup(audioMarkersGroup);
@@ -464,22 +484,18 @@ public class AudioEditor : EditorWindow
     {
         if (selected)
         {
-            EditorGUI.DrawRect(new Rect(rect.x - (rect.width * 0.05f), rect.y - (rect.height * 0.05f), rect.width * 1.2f, rect.height * 1.2f), Color.white);
+            EditorGUI.DrawRect(new Rect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2), Color.white);
         }
-       // GUISkin oldSkin = GUI.skin;
+       
+        GUISkin oldSkin = GUI.skin;
+        GUI.skin = markerBTNSkin;
 
-       // GUI.skin = markerBTNSkin;
-
-        var oldColor = GUI.backgroundColor;
-        GUI.backgroundColor = col;
-        GUI.contentColor = col;
+        Color oldColor = GUI.backgroundColor;
         GUI.color = col;
 
-        bool button = GUI.Button(new Rect(rect.x, rect.y, markerSize.x, markerSize.y), new GUIContent(new Texture2D((int)rect.width*2, (int)rect.height*2)));
+        bool button = GUI.Button(new Rect(rect.x, rect.y, markerSize.x, markerSize.y),"");
 
-        //GUI.skin = oldSkin;
-        GUI.backgroundColor = oldColor;
-        GUI.contentColor = oldColor;
+        GUI.skin = oldSkin;
         GUI.color = oldColor;
 
         return button;
@@ -620,7 +636,6 @@ public class AudioLayer
 {
     public string layerName;
     public Color layerColor;
-    public bool selected = false;
 
     public AudioLayer(string layerName, Color layerColor)
     {
