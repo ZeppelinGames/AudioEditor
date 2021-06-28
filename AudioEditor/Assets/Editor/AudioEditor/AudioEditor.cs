@@ -32,8 +32,8 @@ public class AudioEditor : EditorWindow
     Rect audioMarkersGroup;
     Rect audioSliderGroup;
 
-    float minSliderSize;
-    float maxSliderSize;
+    float minSliderSize=0;
+    float maxSliderSize=1000;
 
     private List<AudioLayer> audioLayers = new List<AudioLayer>();
     private List<AudioMarker> audioMarkers = new List<AudioMarker>();
@@ -45,7 +45,8 @@ public class AudioEditor : EditorWindow
     [MenuItem("Window/Audio/Audio Editor")]
     public static void ShowWindow()
     {
-        GetWindow<AudioEditor>("Audio Editor",true);
+        AudioEditor window = GetWindow<AudioEditor>("Audio Editor", true);
+        window.minSize = new Vector2(100, 100);
     }
 
     private void OnEnable()
@@ -155,7 +156,7 @@ public class AudioEditor : EditorWindow
                 {
                     if (currentEvent.type == EventType.MouseDown || currentEvent.type == EventType.MouseDrag)
                     {
-                        if (pointInRect(currentEvent.mousePosition, topRightGroup) || pointInRect(currentEvent.mousePosition, audioWaveFormGroup))
+                        if (pointInRect(currentEvent.mousePosition, new Rect(new Vector2(rightGroup.x, topRightGroup.y), topRightGroup.size)) || pointInRect(currentEvent.mousePosition, new Rect(new Vector2(rightGroup.x,audioWaveFormGroup.y),audioWaveFormGroup.size)))
                         {
                             UpdateAudioPosition(currentEvent);
                         }
@@ -206,7 +207,7 @@ public class AudioEditor : EditorWindow
         {
             PauseAudio();
             float scale = (position.width / rightGroup.width);
-            audioPosition = Mathf.Clamp(e.mousePosition.x - rightGroup.position.x, 0, position.width) * scale / (rightGroup.width + rightGroup.position.x);
+            audioPosition = (e.mousePosition.x - rightGroup.position.x) * scale / (rightGroup.width + rightGroup.position.x);
             //audioPosition = Mathf.Clamp01(audioPosition);
             e.Use();
         }
@@ -229,7 +230,7 @@ public class AudioEditor : EditorWindow
 
         if (audioClip != null)
         {
-            GUI.Label(new Rect(topLeftGroup.width - 50, topLeftGroup.y, 50, topLeftGroup.height), new GUIContent((audioPosition * audioClip.length).ToString("F2")));
+            GUI.Label(new Rect(topLeftGroup.width - 50, topLeftGroup.y, 50, topLeftGroup.height), new GUIContent((audioPosition * audioClip.length * ((maxSliderSize - minSliderSize) / rightGroup.width)).ToString("F2")));
         }
         GUILayout.EndHorizontal();
         GUI.EndGroup();
@@ -574,8 +575,10 @@ public class AudioEditor : EditorWindow
 
     public Texture2D PaintWaveformSpectrum(AudioClip audio, int width, int height, Color col)
     {
-        Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-        tex.filterMode = FilterMode.Point;
+        Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false)
+        {
+            filterMode = FilterMode.Point
+        };
 
         float[] samples = new float[audio.samples * audio.channels];
         float[] waveform = new float[width];

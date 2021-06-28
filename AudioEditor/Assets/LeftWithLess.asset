@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioFile: {fileID: 8300000, guid: 3c4582794023d694caa4cb5ad68828f9, type: 3}
   audioMarkers:
-  - audioLayer: New Layer_1
-    dataColor: {r: 1, g: 1, b: 1, a: 1}
+  - audioLayer: Noi
+    dataColor: {r: 1, g: 0, b: 0, a: 1}
     audioMarkers:
     - 23.583595
